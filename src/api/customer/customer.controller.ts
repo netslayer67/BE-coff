@@ -23,7 +23,8 @@ export const startSession = async (req: Request, res: Response, next: NextFuncti
             message: 'Validasi berhasil, silakan lanjutkan ke menu.',
             sessionData: {
                 customerName,
-                tableId
+                tableId: table._id,
+                tableNumber: table.tableNumber
             }
         });
 

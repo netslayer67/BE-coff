@@ -3,43 +3,45 @@ import { updateTableAvailability } from '../tables/table.service';
 import { IOrder } from '../../interfaces/Order';
 import { getSocketIO } from '../../services/socket.service';
 import { ApiError } from '../../utils/apiError';
+import { v4 as uuidv4 } from 'uuid'; // <-- 1. Impor uuid
 
-interface CreateOrderInput extends Omit<IOrder, 'orderNumber' | 'status' | 'createdAt' | 'updatedAt' | 'id'> {
-    // Tipe ini akan membantu kita
-}
+interface CreateOrderInput extends Omit<IOrder, 'orderNumber' | 'status' | 'createdAt' | 'updatedAt' | 'id'> {}
 
-const generateOrderNumber = async () => {
-    const today = new Date();
-    const datePrefix = `${today.getFullYear()}${(today.getMonth() + 1).toString().padStart(2, '0')}${today.getDate().toString().padStart(2, '0')}`;
-    const lastOrder = await Order.findOne({ orderNumber: new RegExp(`^${datePrefix}`) }).sort({ createdAt: -1 });
-    let sequence = 1;
-    if (lastOrder) {
-        sequence = parseInt(lastOrder.orderNumber.slice(-4)) + 1;
-    }
-    return `${datePrefix}-${sequence.toString().padStart(4, '0')}`;
+/**
+ * Fungsi untuk membuat nomor pesanan unik menggunakan format UUID.
+ */
+const generateOrderNumber = (): string => {
+    // 2. Gunakan uuidv4() untuk membuat ID unik
+    const uniqueId = uuidv4();
+    // Ambil 8 karakter pertama dan ubah menjadi huruf besar untuk membuatnya lebih pendek dan rapi
+    // Contoh: ORD-550E8400
+    return `ORD-${uniqueId.slice(0, 8).toUpperCase()}`;
 };
 
-export const createNewOrder = async (orderData: CreateOrderInput) => {
+export const createNewOrder = async (orderData: CreateOrderInput): Promise<IOrder> => {
     const { table } = orderData;
     
-    // 1. Panggil service untuk mengunci meja
     await updateTableAvailability(table.toString(), false);
 
     try {
-        const orderNumber = await generateOrderNumber();
-        const newOrder = new Order({ ...orderData, orderNumber });
+        // 3. Panggil fungsi generateOrderNumber yang baru
+        const generatedOrderNumber = generateOrderNumber();
+        
+        const newOrder = new Order({ 
+            ...orderData, 
+            orderNumber: generatedOrderNumber 
+        });
+        
         await newOrder.save();
         await newOrder.populate(['items.product', 'table']);
 
-        // 2. Kirim notifikasi real-time ke kasir
         const io = getSocketIO();
         io.emit('new_order', newOrder); 
 
         return newOrder;
     } catch (error) {
-        // 3. Jika gagal membuat pesanan, buka kembali kunci meja
         await updateTableAvailability(table.toString(), true);
-        throw error; // Lemparkan error agar bisa ditangani lebih lanjut
+        throw error; 
     }
 };
 

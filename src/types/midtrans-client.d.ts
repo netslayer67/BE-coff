@@ -1,14 +1,19 @@
 // File: src/types/midtrans-client.d.ts
 
 declare module 'midtrans-client' {
+  // Mendefinisikan class Snap yang akan kita gunakan
   class Snap {
-    constructor(options: { isProduction: boolean; serverKey: string; clientKey: string });
+    constructor(options: { 
+      isProduction: boolean; 
+      serverKey: string; 
+      clientKey: string 
+    });
+    
+    // Mendefinisikan metode createTransaction
     createTransaction(parameter: any): Promise<any>;
   }
 
-  // Anda bisa menambahkan class lain seperti CoreApi jika diperlukan
-  // class CoreApi { ... }
-
+  // Mendefinisikan apa yang di-ekspor oleh modul
   const midtransClient: {
     Snap: typeof Snap;
   };

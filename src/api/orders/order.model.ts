@@ -8,7 +8,7 @@ const OrderItemSchema = new Schema({
 }, { _id: false }); // No separate _id for subdocuments
 
 const OrderSchema = new Schema<IOrder>({
-    orderNumber: { type: String, required: true, unique: true },
+    orderNumber: { type: String, required: true, unique: true ,sparse: true },
     customerName: { type: String, required: true },
     
     // --- FIX IS HERE ---
