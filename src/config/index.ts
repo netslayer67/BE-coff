@@ -42,6 +42,7 @@ const config = {
     serverKey: getEnvVariable('MIDTRANS_SERVER_KEY'),
     clientKey: getEnvVariable('MIDTRANS_CLIENT_KEY'),
   },
+  corsOrigin: getEnvVariable('CORS_ORIGIN'),
 };
 
 export default config;

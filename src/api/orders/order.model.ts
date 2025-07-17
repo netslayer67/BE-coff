@@ -30,7 +30,7 @@ const OrderSchema = new Schema<IOrder>({
     },
     paymentMethod: { 
         type: String, 
-        enum: ['card', 'qris', 'cashier'] 
+        enum: ['bca_va', 'qris', 'cashier'] 
     },
     paymentStatus: { 
         type: String, 
