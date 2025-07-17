@@ -7,11 +7,24 @@ import config from './config';
 
 const server = http.createServer(app);
 
+
 // --- PERBAIKAN DI SINI ---
-// Tambahkan konfigurasi CORS ke Socket.IO Server
+const allowedOrigins = [
+    'http://localhost:5173',      // Untuk Vite standar
+    'https://localhost:5173',     // Untuk jika Anda menggunakan SSL lagi
+    'https://coffee-flame-five.vercel.app' // Untuk production
+];
+
 const io = new Server(server, {
   cors: {
-    origin: config.corsOrigin, // <-- Ambil URL frontend dari config
+    origin: function (origin, callback) {
+      // Izinkan jika origin ada di dalam daftar, atau jika tidak ada origin (seperti dari Postman)
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ["GET", "POST"]
   }
 });
