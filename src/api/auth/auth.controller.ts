@@ -10,7 +10,6 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         const user = await registerCashier({ name, email, password });
         res.status(201).json({ message: 'Registrasi kasir berhasil', user });
     } catch (error) {
-        // Zod akan melempar error jika validasi gagal, yang akan ditangkap di sini
         next(error);
     }
 };
