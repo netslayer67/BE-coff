@@ -6,9 +6,12 @@ import connectDB from './config/db';
 import config from './config';
 
 const server = http.createServer(app);
+
+// --- PERBAIKAN DI SINI ---
+// Tambahkan konfigurasi CORS ke Socket.IO Server
 const io = new Server(server, {
   cors: {
-    origin: "*", // Ganti dengan domain frontend Anda di produksi
+    origin: config.corsOrigin, // <-- Ambil URL frontend dari config
     methods: ["GET", "POST"]
   }
 });
