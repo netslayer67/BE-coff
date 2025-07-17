@@ -7,7 +7,7 @@ export const errorHandler = (
     res: Response,
     next: NextFunction
 ) => {
-    console.error(err); // Log error untuk debugging
+    console.error(err); 
 
     if (err instanceof ApiError) {
         return res.status(err.statusCode).json({
