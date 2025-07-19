@@ -11,3 +11,11 @@ export const createMultipleTablesSchema = z.array(
     tableNumber: z.string().nonempty("Nomor meja tidak boleh kosong"),
   })
 ).min(1, "Daftar meja tidak boleh kosong");
+
+export const updateTableStatusSchema = z.object({
+  isAvailable: z
+    .boolean()
+    .refine(val => typeof val === 'boolean', {
+      message: "Status ketersediaan harus berupa boolean (true/false)",
+    }),
+});

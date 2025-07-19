@@ -1,11 +1,17 @@
 import Order from './order.model';
-import { updateTableAvailability } from '../tables/table.service';
+// import { updateTableAvailability } from '../tables/table.service';
 import { IOrder } from '../../interfaces/Order';
 import { getSocketIO } from '../../services/socket.service';
 import { ApiError } from '../../utils/apiError';
 import { v4 as uuidv4 } from 'uuid'; // <-- 1. Impor uuid
 
-interface CreateOrderInput extends Omit<IOrder, 'orderNumber' | 'status' | 'createdAt' | 'updatedAt' | 'id' | 'taxAmount' | 'total'> {
+// Interface untuk data yang masuk
+interface CreateOrderInput {
+  customerName: string;
+  orderType: 'dine-in' | 'take away';
+  table?: string;
+  items: { product: string; quantity: number; price: number }[];
+  description?: string;
   subtotal: number;
 }
 
@@ -16,36 +22,36 @@ const generateOrderNumber = (): string => {
 };
 
 export const createNewOrder = async (orderData: CreateOrderInput): Promise<IOrder> => {
-    const { table, subtotal } = orderData;
-    
-    await updateTableAvailability(table.toString(), false);
+    // --- LOGIKA BARU DI SINI ---
+    const { subtotal } = orderData;
+    const taxAmount = subtotal * TAX_RATE;
+    const total = subtotal + taxAmount;
 
     try {
         const generatedOrderNumber = generateOrderNumber();
         
-        // --- PERBAIKAN LOGIKA UTAMA DI SINI ---
-        // 1. Lakukan kalkulasi pajak dan total di backend
-        const taxAmount = subtotal * TAX_RATE;
-        const total = subtotal + taxAmount;
-        
-        // 2. Buat objek pesanan baru dengan data yang sudah dihitung
         const newOrder = new Order({ 
             ...orderData, 
             orderNumber: generatedOrderNumber,
-            taxAmount: taxAmount, // Simpan pajak
-            total: total        // Simpan total akhir
+            taxAmount,
+            total,
         });
         
         await newOrder.save();
-        await newOrder.populate(['items.product', 'table']);
+        // Populate data setelah menyimpan
+        await newOrder.populate([
+            { path: 'items.product', select: 'name imageUrl' },
+            { path: 'table', select: 'tableNumber' }
+        ]);
 
         const io = getSocketIO();
         io.emit('new_order', newOrder); 
 
         return newOrder;
     } catch (error) {
-        await updateTableAvailability(table.toString(), true);
-        throw error; 
+        // Karena tidak ada interaksi meja, penanganan error menjadi lebih sederhana
+        console.error("Gagal membuat pesanan baru:", error);
+        throw error;
     }
 };
 

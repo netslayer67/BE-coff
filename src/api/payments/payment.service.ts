@@ -123,7 +123,7 @@ export const handleMidtransNotification = async (notification: any) => {
     io.emit('payment_update', order);
 };
 // Fungsi untuk memproses pembayaran
-export const processPayment = async (orderId: string, paymentMethod: 'card' | 'qris' | 'cashier') => {
+export const processPayment = async (orderId: string, paymentMethod: 'va' | 'qris' | 'cashier') => {
     const order = await Order.findById(orderId);
 
     if (!order) {
@@ -141,7 +141,7 @@ export const processPayment = async (orderId: string, paymentMethod: 'card' | 'q
     let transactionId = `CASH-${order.orderNumber}`;
 
     // 2. Simulasi proses pembayaran berdasarkan metode
-    if (paymentMethod === 'qris' || paymentMethod === 'card') {
+    if (paymentMethod === 'qris' || paymentMethod === 'va') {
         // --- Simulasi Interaksi Payment Gateway ---
         // Di aplikasi nyata, di sini Anda akan memanggil API Midtrans/Stripe/Xendit
         // dan menunggu respons. Jika berhasil, Anda akan mendapatkan ID transaksi.
